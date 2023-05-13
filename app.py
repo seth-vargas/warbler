@@ -321,11 +321,11 @@ def homepage():
     """
 
     if g.user:
-        messages = (Message
-                    .query
-                    .order_by(Message.timestamp.desc())
-                    .limit(100)
-                    .all())
+        messages = []
+        users = g.user.following
+        for user in users:
+            for msg in user.messages:
+                messages.append(msg)
 
         return render_template('home.html', messages=messages)
 

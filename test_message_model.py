@@ -67,4 +67,36 @@ class MessageModelTestCase(TestCase):
         self.assertEqual(len(u.messages), 1)
         
         
+    def test_liking_message(self):
+        """ Does liking a message work as expected? """
+        
+        u1 = User(
+            email="test@test.com",
+            username="testuser",
+            password="HASHED_PASSWORD"
+        )
+        
+        u2 = User(
+            email="tes2t@test.com",
+            username="testuser2",
+            password="HASHED_PASSWORD_2"
+        )
+        
+        db.session.add_all([u1, u2])
+        db.session.commit()
+
+        m = Message(
+            text = "This is a test",
+            user_id = u1.id
+        )
+        
+        
+        db.session.add(m)
+        u2.likes.append(m)
+        db.session.commit()
+        
+        self.assertIn(m, u2.likes)
+        self.assertEqual(len(u2.likes), 1)
+        
+        
     

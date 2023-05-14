@@ -161,4 +161,31 @@ class UserModelTestCase(TestCase):
             db.session.commit()
             
             
+    #######################################################################################
+    # Test user authentication
     
+    def test_successful_authentication(self):
+        """ Does user.authenticate return a user when given valid credentials? """
+        
+        username = "testuser"
+        password = "HASHED_PASSWORD"
+        email = "test@domain.com"
+        image_url = "https://randomuser.me/api/portraits/men/83.jpg"
+        
+        user = User.signup(username=username, email=email, password=password, image_url=image_url)
+        self.assertEqual(user.authenticate(username, password), user)
+        
+        
+    def test_invalid_username_authentication(self):
+        """ Does user.authenticate return False when given an invaliid username? """
+        
+        correct_username = "correct"
+        incorrect_username = "incorrect"
+        password = "HASHED_PASSWORD"
+        email = "test@domain.com"
+        image_url = "https://randomuser.me/api/portraits/men/83.jpg"
+        
+        user = User.signup(username=correct_username, email=email, password=password, image_url=image_url)
+        
+        self.assertFalse(user.authenticate(incorrect_username, password))
+        

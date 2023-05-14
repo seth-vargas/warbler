@@ -25,7 +25,7 @@ from app import app
 # Create our tables (we do this here, so we only create the tables
 # once for all tests --- in each test, we'll delete the data
 # and create fresh new clean test data
-
+db.drop_all()
 db.create_all()
 
 
@@ -34,6 +34,8 @@ class UserModelTestCase(TestCase):
 
     def setUp(self):
         """Create test client, add sample data."""
+        
+        db.session.rollback()
 
         User.query.delete()
         Message.query.delete()
@@ -58,8 +60,11 @@ class UserModelTestCase(TestCase):
         self.assertEqual(len(u.followers), 0)
         
         
-    def test_follow_unfollow(self):
-        """ Does following and unfollowing work? """
+    #######################################################################################
+    # Testing following and unfollowing
+        
+    def test_follow(self):
+        """ Does following work? """
         
         followed_user = User(
             email = "tester1@testcase.com",
@@ -81,4 +86,99 @@ class UserModelTestCase(TestCase):
         self.assertTrue(followed_user.is_followed_by(following_user))
         self.assertTrue(following_user.is_following(followed_user))
         
+
+    def test_unfollow(self):
+        """ Deos unfollowing work? """
         
+        followed_user = User(
+            email = "tester1@testcase.com",
+            username = "followed_testuser",
+            password = "HASHED_PASSWORD"
+        )
+        
+        following_user_1 = User(
+            email = "tester2@testcase.com",
+            username = "following_testuser",
+            password = "ANOTHER_HASHED_PASSWORD"
+        )
+        
+        following_user_2 = User(
+            email = "tester3@testcase.com",
+            username = "following_testuser_too",
+            password = "ONE_MORE_PASSWORD"
+        )
+        
+        db.session.add_all([followed_user, following_user_1, following_user_2])
+        followed_user.followers.append(following_user_1)
+        followed_user.followers.append(following_user_2)
+        
+        db.session.commit()
+        
+        followed_user.followers.remove(following_user_1)
+        
+        self.assertEqual(len(followed_user.followers), 1)
+        
+        
+    #######################################################################################
+    # Test creating invalid users
+        
+    def test_create_null_user(self):
+        """ Tests that attempting to create a null user behaves as expected """        
+        
+        with self.assertRaises(Exception):
+            
+            invalid_user_1 = User(
+                email = None,
+                username = None,
+                password = None
+            )
+            
+            db.session.add(invalid_user_1)
+            db.session.commit()
+            
+            
+            
+    def test_create_dupe_user(self):
+        """ Tests that an error is raised when a user is duped """
+        
+        with self.assertRaises(Exception):
+            valid_user = User(
+                email = "test@domain.com",
+                username = "same",
+                password = "PASSWORD"
+            )
+            
+            db.session.add(valid_user)
+            db.session.commit()
+            
+            duplicated_user = User(
+                email = "test@domain.com",
+                username = "same",
+                password = "PASSWORD"
+            )
+            
+            db.session.add(duplicated_user)
+            db.session.commit()
+            
+            
+    #######################################################################################
+    # Test user authentication
+    
+    def test_successful_authentication(self):
+        """ Does user.authenticate return a user when given valid credentials? """
+        
+        username = "testuser"
+        password = "HASHED_PASSWORD"
+        
+        user = User(
+            email = "test@domain.com",
+            username = username,
+            password = password
+        )
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        user.query.get(user.id)
+        
+        self.assertEqual(user.authenticate(username, password), user)

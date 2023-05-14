@@ -119,4 +119,46 @@ class UserModelTestCase(TestCase):
         self.assertEqual(len(followed_user.followers), 1)
         
         
-   
+    #######################################################################################
+    # Test creating invalid users
+        
+    def test_create_null_user(self):
+        """ Tests that attempting to create a null user behaves as expected """        
+        
+        with self.assertRaises(Exception):
+            
+            invalid_user_1 = User(
+                email = None,
+                username = None,
+                password = None
+            )
+            
+            db.session.add(invalid_user_1)
+            db.session.commit()
+            
+            
+            
+    def test_create_dupe_user(self):
+        """ Tests that an error is raised when a user is duped """
+        
+        with self.assertRaises(Exception):
+            valid_user = User(
+                email = "test@domain.com",
+                username = "same",
+                password = "PASSWORD"
+            )
+            
+            db.session.add(valid_user)
+            db.session.commit()
+            
+            duplicated_user = User(
+                email = "test@domain.com",
+                username = "same",
+                password = "PASSWORD"
+            )
+            
+            db.session.add(duplicated_user)
+            db.session.commit()
+            
+            
+    

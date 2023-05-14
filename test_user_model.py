@@ -173,6 +173,7 @@ class UserModelTestCase(TestCase):
         image_url = "https://randomuser.me/api/portraits/men/83.jpg"
         
         user = User.signup(username=username, email=email, password=password, image_url=image_url)
+        
         self.assertEqual(user.authenticate(username, password), user)
         
         

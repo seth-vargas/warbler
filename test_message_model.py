@@ -99,4 +99,43 @@ class MessageModelTestCase(TestCase):
         self.assertEqual(len(u2.likes), 1)
         
         
-    
+    def test_deleting_message(self):
+        """ 
+        Deleting a message should:
+        - remove it from Message.query.all()
+        - remove it from <user>.likes
+        - remove it from <user>.messages
+        """
+        
+        u1 = User(
+            email="test@test.com",
+            username="testuser",
+            password="HASHED_PASSWORD"
+        )
+        
+        u2 = User(
+            email="tes2t@test.com",
+            username="testuser2",
+            password="HASHED_PASSWORD_2"
+        )
+        
+        db.session.add_all([u1, u2])
+        db.session.commit()
+
+        m = Message(
+            text = "This is a test",
+            user_id = u1.id
+        )
+        
+        db.session.add(m)
+        db.session.commit()
+        
+        u2.likes.append(m)
+        db.session.commit()
+        
+        db.session.delete(m)
+        db.session.commit()
+        
+        self.assertEqual(len(Message.query.all()), 0)
+        self.assertEqual(len(u2.likes), 0)
+        self.assertEqual(len(u1.messages), 0)

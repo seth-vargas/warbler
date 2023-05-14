@@ -30,7 +30,7 @@ db.create_all()
 
 
 class UserModelTestCase(TestCase):
-    """Test views for messages."""
+    """Tests user models."""
 
     def setUp(self):
         """Create test client, add sample data."""
@@ -56,3 +56,29 @@ class UserModelTestCase(TestCase):
         # User should have no messages & no followers
         self.assertEqual(len(u.messages), 0)
         self.assertEqual(len(u.followers), 0)
+        
+        
+    def test_follow_unfollow(self):
+        """ Does following and unfollowing work? """
+        
+        followed_user = User(
+            email = "tester1@testcase.com",
+            username = "followed_testuser",
+            password = "HASHED_PASSWORD"
+        )
+        
+        following_user = User(
+            email = "tester2@testcase.com",
+            username = "following_testuser",
+            password = "ANOTHER_HASHED_PASSWORD"
+        )
+        
+        db.session.add_all([followed_user, following_user])
+        followed_user.followers.append(following_user)
+        
+        db.session.commit()
+        
+        self.assertTrue(followed_user.is_followed_by(following_user))
+        self.assertTrue(following_user.is_following(followed_user))
+        
+        

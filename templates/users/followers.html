@@ -3,7 +3,7 @@
 {% block user_details %}
 <div class="col-sm-9">
     <div class="row">
-        {% if users|length == 0 %}
+        {% if user.followers|length == 0 %}
             <h3 class="text-center">Sorry, no users found</h3>
         {% else %}
 

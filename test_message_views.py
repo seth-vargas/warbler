@@ -114,3 +114,4 @@ class MessageViewTestCase(TestCase):
 
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp.location, 'http://localhost/users/1')
+        self.assertEqual(len(Message.query.all()), 0)
